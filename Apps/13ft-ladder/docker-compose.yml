@@ -1,0 +1,56 @@
+name: jellyfin
+services:
+  app:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    restart: unless-stopped
+    environment:
+      TZ: Etc/UTC
+    x-casaos:
+      envs:
+        - container: TZ
+          description:
+            en_us: Timezone for the container (e.g. Etc/UTC, America/New_York).
+    ports:
+      - target: 8096
+        published: 8096
+        protocol: tcp
+      - target: 8920
+        published: 8920
+        protocol: tcp
+      - target: 7359
+        published: 7359
+        protocol: udp
+      - target: 1900
+        published: 1900
+        protocol: udp
+    volumes:
+      - type: bind
+        source: /DATA/AppData/$AppID/config
+        target: /config
+      - type: bind
+        source: /DATA/AppData/$AppID/cache
+        target: /cache
+      - type: bind
+        source: /DATA/Media
+        target: /media
+    devices:
+      - /dev/dri:/dev/dri   # Enable Intel iGPU hardware acceleration (optional)
+x-casaos:
+  architectures:
+    - amd64
+    - arm
+    - arm64
+  main: app
+  description:
+    en_us: Jellyfin is a Free Software Media System that puts you in control of managing and streaming your media.
+  tagline:
+    en_us: Free Software Media System
+  developer: Jellyfin Project
+  author: Jellyfin Contributors
+  icon: https://raw.githubusercontent.com/pi-hosted/pi-hosted/master/images/jellyfin.png
+  thumbnail: https://raw.githubusercontent.com/pi-hosted/pi-hosted/master/images/jellyfin.png
+  title:
+    en_us: Jellyfin
+  category: Media
+  port_map: '8096'
