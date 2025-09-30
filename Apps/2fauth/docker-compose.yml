@@ -1,0 +1,71 @@
+name: 2fauth
+services:
+  app:
+    # Uses the official Docker image for 2FAuth
+    image: 2fauth/2fauth:latest
+    container_name: 2fauth
+    restart: unless-stopped
+    ports:
+      # Default port for 2FAuth's web UI
+      - target: 8000
+        published: 8000
+        protocol: tcp
+    environment:
+      # PUID/PGID for file permissions, which is good practice for self-hosted apps
+      - PUID=1000
+      - PGID=1000
+      - TZ=$TZ
+      
+      # --- Critical 2FAuth Configuration ---
+      # **SECURITY KEY**: This MUST be a unique, 32-character hexadecimal string.
+      # It is VITAL for encrypting sensitive data. The user must be prompted to set this.
+      - APP_KEY=$APP_KEY
+      
+      # The email address of the site owner/admin.
+      - SITE_OWNER=blissoskala@gmail.com
+      
+      # Set the application environment to production for stability
+      - APP_ENV=production
+      
+      # This is required for 2FAuth to function correctly as a web application
+      - AUTHENTICATION_GUARD=web-guard
+
+    volumes:
+      # /2fauth stores the SQLite database (database.sqlite) and other persistent data.
+      - type: bind
+        source: /DATA/AppData/$AppID/2fauth
+        target: /2fauth
+        
+    # --- CasaOS/ZimaOS App Store Metadata ---
+    x-casaos:
+      envs:
+        - name: TZ
+          label: Timezone
+          value: Europe/London
+          type: select
+        - name: APP_KEY
+          label: Application Security Key (32-char hex)
+          description: A unique, 32-character hexadecimal key required for data encryption. **DO NOT LOSE THIS!**
+          # NOTE: The user still needs to generate and replace this placeholder value when installing!
+          value: "replace_with_a_secure_32_char_key" 
+          type: text
+        - name: SITE_OWNER
+          label: Site Owner Email
+          description: The email of the primary administrator for the application.
+          # The value for the UI field is now pre-set to your provided email
+          value: "blissoskala@gmail.com"
+          type: text
+          
+      architectures:
+        - amd64
+        - arm64
+        - arm
+      main: app
+      description: |
+        2FAuth is a self-hosted, web-based alternative to OTP generators like Google Authenticator. It allows you to securely manage your 2FA accounts and generate codes from your desktop or mobile browser.
+      tagline: Self-hosted Two-Factor Authentication Manager.
+      developer: 2FAuth
+      icon: https://raw.githubusercontent.com/Bubka/2FAuth/master/public/logo.png
+      title: 2FAuth
+      category: Utilities
+      port_map: 8000
