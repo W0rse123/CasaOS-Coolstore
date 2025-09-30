@@ -1,39 +1,41 @@
-name: archivebox
+name: jellyfin
 services:
   app:
-    image: archivebox/archivebox:0.7
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
     restart: unless-stopped
     environment:
-      ALLOWED_HOSTS: '*'
-      MEDIA_MAX_SIZE: 500m
-      PUBLIC_INDEX: true
-      PUBLIC_SNAPSHOTS: true
-      PUBLIC_ADD_VIEW: true
+      TZ: Etc/UTC
     x-casaos:
       envs:
-        - container: ALLOWED_HOSTS
+        - container: TZ
           description:
-            en_us: ''
-        - container: MEDIA_MAX_SIZE
-          description:
-            en_us: ''
-        - container: PUBLIC_INDEX
-          description:
-            en_us: ''
-        - container: PUBLIC_SNAPSHOTS
-          description:
-            en_us: ''
-        - container: PUBLIC_ADD_VIEW
-          description:
-            en_us: ''
+            en_us: Timezone for the container (e.g. Etc/UTC, America/New_York).
     ports:
-      - target: 8000
-        published: 8002
+      - target: 8096
+        published: 8096
         protocol: tcp
+      - target: 8920
+        published: 8920
+        protocol: tcp
+      - target: 7359
+        published: 7359
+        protocol: udp
+      - target: 1900
+        published: 1900
+        protocol: udp
     volumes:
       - type: bind
-        source: /DATA/AppData/$AppID/data
-        target: /data
+        source: /DATA/AppData/$AppID/config
+        target: /config
+      - type: bind
+        source: /DATA/AppData/$AppID/cache
+        target: /cache
+      - type: bind
+        source: /DATA/Media
+        target: /media
+    devices:
+      - /dev/dri:/dev/dri   # Enable Intel iGPU hardware acceleration (optional)
 x-casaos:
   architectures:
     - amd64
@@ -41,14 +43,14 @@ x-casaos:
     - arm64
   main: app
   description:
-    en_us: ArchiveBox is a powerful, self-hosted internet archiving solution to collect, save, and view sites you want to preserve offline.
+    en_us: Jellyfin is a Free Software Media System that puts you in control of managing and streaming your media.
   tagline:
-    en_us: Archivebox Is A Powerful, Self-hosted Internet Archiving Solution To Collect, Save, And View Sites You Want To Preserve Offline.
-  developer: ''
-  author: WisdomSky
-  icon: https://raw.githubusercontent.com/pi-hosted/pi-hosted/master/images/archivebox.png
-  thumbnail: https://raw.githubusercontent.com/pi-hosted/pi-hosted/master/images/archivebox.png
+    en_us: Free Software Media System
+  developer: Jellyfin Project
+  author: Jellyfin Contributors
+  icon: https://raw.githubusercontent.com/pi-hosted/pi-hosted/master/images/jellyfin.png
+  thumbnail: https://raw.githubusercontent.com/pi-hosted/pi-hosted/master/images/jellyfin.png
   title:
-    en_us: Archivebox
-  category: Coolstore
-  port_map: '8002'
+    en_us: Jellyfin
+  category: Media
+  port_map: '8096'
